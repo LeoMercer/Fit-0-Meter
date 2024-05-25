@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-size: cover;
+            /* Ensure the background image covers the entire viewport */
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.7);
+            /* Added background color with opacity for better readability */
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            /* Make labels appear on a new line */
+            margin-bottom: 5px;
+            /* Add space between label and dropdown */
+        }
+
+        .dropdown {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .dropdown select,
+        .data-input input {
+            width: calc(100% - 22px);
+            /* Adjusted width to accommodate for arrow */
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            appearance: none;
+            /* Remove default arrow icon */
+            -webkit-appearance: none;
+            /* For older versions of Chrome and Safari */
+            -moz-appearance: none;
+            /* For older versions of Firefox */
+        }
+
+        /* Style the dropdown arrow */
+        .dropdown::after {
+            content: '\25BC';
+            /* Unicode character for downward arrow */
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            pointer-events: none;
+            /* Prevent the arrow from being clicked */
+        }
+
+        .data-input {
+            margin-bottom: 20px;
+            position: relative;
+            width: calc(50% - 10px);
+            /* Adjusted width for better spacing */
+            display: inline-block;
+            padding: 0 10px;
+            /* Adjusted padding for better spacing */
+        }
+
+        /* Style the small boxes */
+        .data-box {
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            display: inline-block;
+            width: calc(20% - 10px);
+            /* Adjusted width to accommodate margin */
+            margin-right: 10px;
+            vertical-align: top;
+            margin-top: 20px;
+            /* Space between boxes and top */
+        }
+
+        /* Styling for the main buttons */
+        .button-container {
+            text-align: center;
+            /* Center align buttons */
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #ff1100;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 0 5px;
+            /* Add margin between buttons */
+        }
+
+        .button:hover {
+            background-color: #00b303;
+        }
+
+        /* Style for the box container */
+        .box-container {
+            text-align: center;
+            margin-top: 20px;
+            margin-left: auto;
+            margin-right: auto;
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            /* Adjusted width for better responsiveness */
+        }
+
+        /* Adjusted style for the small boxes */
+        .data-box {
+            background-color: #ffcc00;
+            /* Yellow */
+        }
+
+        .data-box:nth-child(2) {
+            background-color: #3399ff;
+            /* Blue */
+        }
+
+        .data-box:nth-child(3) {
+            background-color: #ff6666;
+            /* Red */
+        }
+
+        .data-box:nth-child(4) {
+            background-color: #66cc99;
+            /* Green */
+        }
+
+        .data-box:nth-child(5) {
+            background-color: #9966ff;
+            /* Purple */
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Small boxes container -->
+    <div class="box-container">
+        <div class="data-box">
+            <label for="height">Height:</label>
+            <div class="data-input">
+                <input type="number" id="height" placeholder="Enter height in cm">
+            </div>
+        </div>
+        <div class="data-box">
+            <label for="weight">Weight:</label>
+            <div class="data-input">
+                <input type="number" id="weight" placeholder="Enter weight in kg">
+            </div>
+        </div>
+        <div class="data-box">
+            <label for="bmi">BMI:</label>
+            <span id="bmi">Calculate BMI after entering height and weight</span>
+        </div>
+        <div class="data-box">
+            <label for="heart-points">Heart Points:</label>
+            <span id="heart-points">0</span>
+        </div>
+        <div class="data-box">
+            <label for="heart-rate">Heart Rate:</label>
+            <span id="heart-rate">0 bpm</span>
+        </div>
+    </div>
+
+    <!-- Main activity tracker container -->
+    <div class="container">
+        <h1>Activity Tracker</h1>
+        <div class="dropdown">
+            <label for="activity">Select Activity:</label>
+            <select id="activity">
+                <option value="" selected>Select Activity</option>
+                <option value="walking">Walking</option>
+                <option value="running">Running</option>
+                <option value="swimming">Swimming</option>
+                <option value="cycling">Cycling</option>
+            </select>
+        </div>
+        <div class="timer" id="timer">00:00:00</div>
+        <div class="distance" id="distance">Distance: 0.000 km</div>
+        <div class="steps" id="steps">Steps: 0</div>
+        <div class="button-container"> <!-- Container for buttons -->
+            <button class="button" id="start">Start</button>
+            <button class="button" id="stop">Stop</button>
+        </div>
+    </div>
+
+    <script>
+        let timerInterval;
+        let startTime;
+        let distance_km = 0;
+        let steps = 0;
+
+        function startTimer() {
+            startTime = new Date().getTime();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function updateTimer() {
+            let currentTime = new Date().getTime();
+            let elapsedTime = currentTime - startTime;
+            let hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+            let minutes = Math.floor((elapsedTime % (1000 * 60 * 60)) / (1000 * 60));
+            let seconds = Math.floor((elapsedTime % (1000 * 60)) / 1000);
+            document.getElementById('timer').innerText = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            // Calculate distance in km
+            distance_km = elapsedTime / 300000; // 1 km every 5 minutes
+            document.getElementById('distance').innerText = `Distance: ${distance_km.toFixed(3)} km`;
+
+            // Calculate steps assuming 1 second = 1 step
+            steps = Math.floor(elapsedTime / 1000);
+            document.getElementById('steps').innerText = `Steps: ${steps}`;
+        }
+
+        function calculateBMI() {
+            let height = parseFloat(document.getElementById('height').value);
+            let weight = parseFloat(document.getElementById('weight').value);
+            if (isNaN(height) || isNaN(weight) || height <= 0 || weight <= 0) {
+                document.getElementById('bmi').innerText = 'Please enter valid height and weight';
+            } else {
+                let bmi = weight / ((height / 100) * (height / 100));
+                document.getElementById('bmi').innerText = bmi.toFixed(2);
+            }
+        }
+
+        // Event listeners for input fields
+        document.getElementById('height').addEventListener('input', calculateBMI);
+        document.getElementById('weight').addEventListener('input', calculateBMI);
+
+        // Function to change background image based on selected activity
+        document.getElementById('activity').addEventListener('change', function () {
+            let selectedActivity = this.value;
+            let imageUrl;
+            switch (selectedActivity) {
+                case 'walking':
+                    imageUrl = 'url("../Images/walking.jpg")';
+                    break;
+                case 'running':
+                    imageUrl = 'url("../Images/running.jpg")';
+                    break;
+                case 'swimming':
+                    imageUrl = 'url("../Images/swimming.jpg")';
+                    break;
+                case 'cycling':
+                    imageUrl = 'url("../Images/cycling.jpg")';
+                    break;
+                default:
+                    imageUrl = 'url("../Images/activity.jpg")';
+            }
+            document.body.style.backgroundImage = imageUrl;
+        });
+
+        // Event listeners for start and stop buttons
+        document.getElementById('start').addEventListener('click', startTimer);
+        document.getElementById('stop').addEventListener('click', stopTimer);
+    </script>
+</body>
+
+</html>
